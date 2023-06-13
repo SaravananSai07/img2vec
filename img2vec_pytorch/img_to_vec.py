@@ -63,7 +63,12 @@ class Img2Vec():
                 my_embedding = torch.zeros(len(img), self.layer_output_size, 1, 1)
 
             def copy_data(m, i, o):
-                my_embedding.copy_(o.data)
+                if self.model_name == 'densenet' or 'efficientnet' in self.model_name:
+                    my_embedding = torch.zeros(len(img), self.layer_output_size)
+                    o_data = torch.mean(o.data, (2, 3), True).squeeze(2).squeeze(2)
+                    my_embedding.copy_(o_data)
+                else:
+                    my_embedding.copy_(o.data)
 
             h = self.extraction_layer.register_forward_hook(copy_data)
             with torch.no_grad():
@@ -90,7 +95,12 @@ class Img2Vec():
                 my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
             def copy_data(m, i, o):
-                my_embedding.copy_(o.data)
+                if self.model_name == 'densenet' or 'efficientnet' in self.model_name:
+                    my_embedding = torch.zeros(len(img), self.layer_output_size)
+                    o_data = torch.mean(o.data, (2, 3), True).squeeze(2).squeeze(2)
+                    my_embedding.copy_(o_data)
+                else:
+                    my_embedding.copy_(o.data)
 
             h = self.extraction_layer.register_forward_hook(copy_data)
             with torch.no_grad():
