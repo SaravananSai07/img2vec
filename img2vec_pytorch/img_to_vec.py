@@ -63,10 +63,9 @@ class Img2Vec():
                 my_embedding = torch.zeros(len(img), self.layer_output_size, 1, 1)
 
             def copy_data(m, i, o):
+                nonlocal my_embedding
                 if self.model_name == 'densenet' or 'efficientnet' in self.model_name:
-                    my_embedding = torch.zeros(len(img), self.layer_output_size)
-                    o_data = torch.mean(o.data, (2, 3), True).squeeze(2).squeeze(2)
-                    my_embedding.copy_(o_data)
+                    my_embedding = torch.mean(o.data, dim=(2, 3), keepdim=True).view(len(img), -1, 1, 1)
                 else:
                     my_embedding.copy_(o.data)
 
@@ -81,7 +80,7 @@ class Img2Vec():
                 if self.model_name in ['alexnet', 'vgg']:
                     return my_embedding.numpy()[:, :]
                 elif self.model_name == 'densenet' or 'efficientnet' in self.model_name:
-                    return torch.mean(my_embedding, (2, 3), True).numpy()[:, :, 0, 0]
+                    return torch.mean(my_embedding, dim=(2, 3), keepdim=True).squeeze(dim=(2, 3)).numpy()
                 else:
                     return my_embedding.numpy()[:, :, 0, 0]
         else:
@@ -95,10 +94,9 @@ class Img2Vec():
                 my_embedding = torch.zeros(1, self.layer_output_size, 1, 1)
 
             def copy_data(m, i, o):
+                nonlocal my_embedding
                 if self.model_name == 'densenet' or 'efficientnet' in self.model_name:
-                    my_embedding = torch.zeros(len(img), self.layer_output_size)
-                    o_data = torch.mean(o.data, (2, 3), True).squeeze(2).squeeze(2)
-                    my_embedding.copy_(o_data)
+                    my_embedding = torch.mean(o.data, dim=(2, 3), keepdim=True).view(len(img), -1, 1, 1)
                 else:
                     my_embedding.copy_(o.data)
 
@@ -113,7 +111,7 @@ class Img2Vec():
                 if self.model_name in ['alexnet', 'vgg']:
                     return my_embedding.numpy()[0, :]
                 elif self.model_name == 'densenet':
-                    return torch.mean(my_embedding, (2, 3), True).numpy()[0, :, 0, 0]
+                    return torch.mean(my_embedding, dim=(2, 3), keepdim=True).squeeze(dim=(2, 3)).numpy()
                 else:
                     return my_embedding.numpy()[0, :, 0, 0]
 
